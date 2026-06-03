@@ -353,8 +353,15 @@ volgen
       $('settingsPointList').innerHTML = state.settingsPoints.length ? state.settingsPoints.map(point => {
         const prov = point.province ? ` — ${point.province}` : '';
         const cats = point.categories && point.categories.length ? ` — ${point.categories.join(', ')}` : '';
-        return ` <div><strong>${point.number}</strong> — ${getLocationName(point.number)} — ${point.x.toFixed(1)}%, ${point.y.toFixed(1)}%${prov}${cats}</div>`;
+        return ` <div><strong>${point.number}</strong> — ${getLocationName(point.number)} — ${point.x.toFixed(1)}%, ${point.y.toFixed(1)}%${prov}${cats} <button type="button" class="secondary delete-settings-point" data-number="${point.number}">Verwijder punt</button></div>`;
       }).join('') : '<div>Geen opgeslagen punten.</div>';
+      document.querySelectorAll('.delete-settings-point').forEach(button => {
+        button.addEventListener('click', event => {
+          const number = Number(event.currentTarget.dataset.number);
+          if (!Number.isInteger(number)) return;
+          deleteSavedPoint(number);
+        });
+      });
       state.settingsPoints.forEach(point => {
         const marker = createMarker(point, true);
         marker.addEventListener('click', () => {
@@ -605,6 +612,13 @@ volgen
       saveJSON('topo132-settings-points', state.settingsPoints);
       state.selectedPoint = null;
       $('settingsNumber').value = '';
+      renderSettingsPage();
+      renderLearnPage();
+    }
+
+    function deleteSavedPoint(number) {
+      state.settingsPoints = state.settingsPoints.filter(item => item.number !== number);
+      saveJSON('topo132-settings-points', state.settingsPoints);
       renderSettingsPage();
       renderLearnPage();
     }
