@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topo Trainer 132</title>
+  <style>
+    :root {
+      --bg: #eef4fb;
+      --surface: #ffffff;
+      --surface-strong: #f7fbff;
+      --border: rgba(19, 34, 56, 0.08);
+      --text: #12233f;
+      --muted: #5b667f;
+      --accent: #0f75d3;
+      --accent-soft: #d7edff;
+      --good: #148f4b;
+      --bad: #d8473c;
+      --shadow: 0 20px 55px rgba(13, 60, 110, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: linear-gradient(180deg, #e9f5ff 0%, #fef7f3 100%); color: var(--text); font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { padding-bottom: 32px; }
+    img { max-width: 100%; display: block; }
+    button, input, select { font: inherit; }
+    .page { width: min(1180px, calc(100% - 32px)); margin: auto; padding: 24px 0; }
+    header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+    header h1 { margin: 0; font-size: clamp(2rem, 3.8vw, 2.8rem); }
+    header p { margin: 0; max-width: 760px; color: var(--muted); line-height: 1.6; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .tabs button { border: 1px solid transparent; background: rgba(255,255,255,0.9); color: var(--text); border-radius: 999px; padding: 12px 20px; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+    .tabs button.active { background: linear-gradient(135deg, #1374d8, #22b2c3); color: white; border-color: rgba(19, 34, 56, 0.08); }
+
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); padding: 20px; }
+    .grid-2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 22px; align-items: start; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .full-width { grid-column: 1 / -1; }
+    .small-card { background: var(--surface-strong); padding: 16px; border: 1px solid var(--border); border-radius: 18px; }
+    .label { font-size: 0.95rem; color: var(--muted); margin-bottom: 8px; display: block; }
+    .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+    .control-row > * { flex: 1 1 180px; min-width: 140px; }
+    input[type='number'], input[type='text'], select { width: 100%; border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background: white; color: var(--text); }
+    input[type='range'] { width: 100%; }
+    button.primary { background: var(--accent); color: white; border-color: transparent; }
+    button.secondary { background: var(--accent-soft); color: var(--text); }
+    button.danger { background: #fef0f0; color: var(--bad); border: 1px solid rgba(216, 71, 60, 0.15); }
+    .hint { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+    .map-panel { position: relative; border-radius: 24px; overflow: hidden; background: #f2f7ff; border: 1px solid var(--border); }
+    .map-panel img { width: 100%; height: auto; display: block; cursor: crosshair; }
+    .map-overlay { position: absolute; inset: 0; pointer-events: none; }
+    .map-overlay button, .map-overlay .point-marker { position: absolute; transform: translate(-50%, -50%); }
+    .map-overlay button { pointer-events: auto; }
+    .map-overlay button.hotspot { width: 28px; height: 28px; border-radius: 50%; background: rgba(15,117,211,0.14); border: 2px solid rgba(15,117,211,0.8); cursor: pointer; transition: transform 0.12s ease, background-color 0.12s ease, border-color 0.12s ease; }
+    .map-overlay button.hotspot:hover { transform: translate(-50%, -50%) scale(1.08); background: rgba(15,117,211,0.24); }
+    .point-marker { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,87,34,0.95); background: rgba(255,87,34,0.22); pointer-events: none; }
+    .status-box { border-radius: 18px; background: var(--surface-strong); border: 1px solid var(--border); padding: 16px; gap: 14px; display: grid; }
+    .status-box h2 { margin: 0 0 10px; font-size: 1.1rem; }
+    .info-card { display: grid; gap: 10px; }
+    .answer-box { min-height: 56px; padding: 16px; border-radius: 18px; background: #f7fbff; border: 1px solid rgba(19,34,56,0.08); font-size: 1rem; line-height: 1.5; }
+    .answer-good { color: var(--good); }
+    .answer-bad { color: var(--bad); }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f5f9ff; border: 1px solid transparent; border-radius: 999px; color: var(--text); font-size: 0.92rem; }
+    .checkbox-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+    .checkbox-list label { display: flex; align-items: center; gap: 10px; font-size: 0.96rem; color: var(--text); cursor: pointer; }
+    .checkbox-list input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--accent); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid rgba(19,34,56,0.08); }
+    th { cursor: pointer; white-space: nowrap; user-select: none; position: relative; }
+    th span.sort-indicator { margin-left: 8px; opacity: 0.5; }
+    tr:hover td { background: rgba(13,60,110,0.03); }
+    .small-note { color: var(--muted); font-size: 0.92rem; }
+    .hidden { display: none !important; }
+    .wide { width: 100%; }
+    @media(max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>Topo Trainer 132</h1>
+        <p>Beheer punten in Instellingen, oefen op de lege kaart en bekijk de antwoorden op de genummerde kaart.</p>
+      </div>
+      <div class="tabs" role="tablist">
+        <button id="tabLearn" class="active" data-tab="learn" type="button">Topo leren</button>
+        <button id="tabPractice" data-tab="practice" type="button">Topo oefenen</button>
+        <button id="tabStats" data-tab="stats" type="button">Statistieken</button>
+        <button id="tabSettings" data-tab="settings" type="button">Instellingen</button>
+      </div>
+    </header>
+
+    <section id="learnPage" class="panel">
+      <div class="grid-2">
+        <div class="map-panel">
+          <img src="topo132%20genummerd.png" alt="Topo kaart nummering" class="map-image" id="learnMap">
+          <div class="map-overlay" id="learnOverlay"></div>
+        </div>
+        <div class="status-box">
+          <h2>Antwoord</h2>
+          <div id="learnAnswer" class="answer-box">Klik op een punt om het opgeslagen nummer en de plaatsnaam te zien.</div>
+          <div class="small-note">Deze pagina toont de punten die in Instellingen zijn ingevoerd.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="practicePage" class="panel hidden">
+      <div class="grid-2">
+        <div class="map-panel">
+          <img src="topo132%20ongenummerd.png" alt="Topo kaart zonder nummers" class="map-image" id="practiceMap">
+          <div class="map-overlay" id="practiceOverlay"></div>
+        </div>
+        <div class="status-box">
+          <h2>Oefensessie</h2>
+          <div id="practicePrompt" class="answer-box">Klik op Start oefensessie om te beginnen.</div>
+          <div class="control-row">
+            <label class="label" for="questionCount">Aantal vragen</label>
+            <input id="questionCount" type="number" min="1" value="10">
+          </div>
+          <div class="control-row">
+            <button id="startPractice" class="primary wide" type="button">Start oefensessie</button>
+          </div>
+          <div class="control-row" style="margin-top:12px;">
+            <input id="practiceAnswer" type="text" placeholder="Typ hier je antwoord" autocomplete="off" aria-label="Oefenantwoord">
+            <button id="submitAnswer" class="primary" type="button">Controleer</button>
+          </div>
+          <div id="practiceFeedback" class="answer-box hidden"></div>
+          <div class="small-note">De oefenvragen gebruiken de punten uit Instellingen.</div>
+          <div class="info-card" style="margin-top:12px;">
+            <div>Aantal vragen: <strong id="sessionTotal">0</strong></div>
+            <div>Gevraagd: <strong id="sessionAsked">0</strong></div>
+            <div>Goed: <strong id="sessionCorrect">0</strong></div>
+            <div>Fout: <strong id="sessionWrong">0</strong></div>
+            <div>Resterend: <strong id="sessionRemaining">0</strong></div>
+          </div>
+          <div class="control-row" style="margin-top:12px;">
+            <button id="nextQuestion" class="secondary wide" type="button">Volgende vraag</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="statsPage" class="panel hidden">
+      <div class="grid-2">
+        <div class="panel small-card">
+          <h2>Statistieken per plaats</h2>
+          <div class="table-wrap">
+            <table id="placeStatsTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Plaats / gebied</th>
+                  <th>Juiste antwoorden</th>
+                  <th>Foute antwoorden</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody id="placeStatsBody"></tbody>
+            </table>
+          </div>
+          <p class="small-note">Hier zie je de score per opgeslagen punt.</p>
+        </div>
+
+        <div class="panel small-card">
+          <h2>Score per oefensessie</h2>
+          <div class="table-wrap" style="max-height: 580px; overflow: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Gevraagd</th>
+                  <th>Goed</th>
+                  <th>Fout</th>
+                  <th>Score</th>
+                  <th>Filters</th>
+                  <th>Duur</th>
+                </tr>
+              </thead>
+              <tbody id="sessionStatsBody"></tbody>
+            </table>
+          </div>
+          <p class="small-note">Oefensessies worden opgeslagen zodat je later je voortgang kunt bekijken.</p>
+        </div>
+      </div>
+      <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="resetProgress" class="danger" type="button">Wis voortgang</button>
+        <button id="refreshStats" class="secondary" type="button">Vernieuw statistieken</button>
+      </div>
+    </section>
+
+    <section id="settingsPage" class="panel hidden">
+      <div class="grid-2">
+        <div class="map-panel">
+          <img src="topo132%20genummerd.png" alt="Topo kaart nummering" class="map-image" id="settingsMap">
+          <div class="map-overlay" id="settingsOverlay"></div>
+        </div>
+        <div class="status-box">
+          <h2>Instellingen</h2>
+          <div id="settingsInfo" class="answer-box">Klik op een locatie op de genummerde kaart, voer het bijbehorende nummer in en sla het punt op.</div>
+          <div class="control-row">
+            <label class="label" for="settingsNumber">Nummer</label>
+            <input id="settingsNumber" type="number" min="1" placeholder="Bijvoorbeeld 12">
+          </div>
+          <div class="control-row">
+            <button id="saveSettingsPoint" class="primary wide" type="button">Punt opslaan</button>
+            <button id="clearSettingsPoints" class="secondary wide" type="button">Alles verwijderen</button>
+          </div>
+          <div class="small-note">Opgeslagen punten worden automatisch gebruikt in de leer- en oefenpagina.</div>
+          <div class="panel small-card" style="margin-top:18px;">
+            <h3 style="margin-top:0;">Opgeslagen punten</h3>
+            <ul id="settingsPointList" class="small-note" style="padding-left:18px; margin:0;"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+  const DOCX_NAME_MAP = {
+      1: 'Rottumerplaat',
+      2: 'Schiermonnikoog',
+      3: 'Ameland',
+      4: 'Terschelling',
+      5: 'Delfzijl',
+      6: 'Vlieland',
+      7: 'Dollard',
+      8: 'Waddenzee',
+      9: 'Eemskanaal',
+      10: 'Groningen (provincie)',
+      11: 'Eems',
+      12: 'Groningen (stad)',
+      13: 'Leeuwarden',
+      14: 'Fryslân (Friesland)',
+      15: 'Winschoten',
+      16: 'Veendam',
+      17: 'Drachten',
+      18: 'Texel',
+      19: 'Sneek',
+      20: 'Afsluitdijk',
+      21: 'Assen',
+      22: 'Stadskanaal',
+      23: 'Heerenveen',
+      24: 'Den Helder',
+      25: 'Drenthe',
+      26: 'Noordhollands Kanaal',
+      27: 'Emmen',
+      28: 'Ijsselmeer',
+      29: 'Hoogeveen',
+      30: 'Emmeloord',
+      31: 'Enkhuizen',
+      32: 'Meppel',
+      33: 'Noord-Holland',
+      34: 'Hoorn',
+      35: 'Alkmaar',
+      36: 'Kampen',
+      37: 'Overijssel',
+      38: 'Markermeer',
+      39: 'Zwolle',
+      40: 'Purmerend',
+      41: 'Lelystad',
+      42: 'Flevoland',
+      43: 'Noordzeekanaal',
+      44: 'Zaandam',
+      45: 'Haarlem',
+      46: 'Almere',
+      47: 'Amsterdam',
+      48: 'Almelo',
+      49: 'Harderwijk',
+      50: 'IJssel',
+      51: 'Amstelveen',
+      52: 'Schiphol',
+      53: 'Veluwe',
+      54: 'Twente',
+      55: 'Hengelo',
+      56: 'Haarlemmermeer',
+      57: 'Deventer',
+      58: 'Hilversum',
+      59: 'Enschede',
+      60: 'Apeldoorn',
+      61: 'Twentekanaal',
+      62: 'Amsterdam-Rijnkanaal',
+      63: 'Leiden',
+      64: 'Amersfoort',
+      65: 'Zutphen',
+      66: 'Randstad',
+      67: 'Alphen aan den Rijn',
+      68: 'Utrecht (stad)',
+      69: 'Zeist',
+      70: 'Den Haag',
+      71: 'Utrecht (provincie)',
+      72: 'Zoetermeer',
+      73: 'Gelderland',
+      74: 'Ede',
+      75: 'Nieuwegein',
+      76: 'Veenendaal',
+      77: 'Delft',
+      78: 'Gouda',
+      79: 'Achterhoek',
+      80: 'Arnhem',
+      81: 'Winterswijk',
+      82: 'Lek',
+      83: 'Nieuwe Waterweg',
+      84: 'Wageningen',
+      85: 'Doetinchem',
+      86: 'Neder-Rijn',
+      87: 'Rotterdam',
+      88: 'Schiedam',
+      89: 'Vlaardingen',
+      90: 'Dordrecht',
+      91: 'Tiel',
+      92: 'Spijkenisse',
+      93: 'Rijn',
+      94: 'Nijmegen',
+      95: 'Oude Maas',
+      96: 'Gorinchem',
+      97: 'Waal',
+      98: 'Merwede',
+      99: 'Maastricht',
+      100: 'Haringvliet',
+      101: 'Hoeksche Waard',
+      102: 'Rijnmond',
+      103: 'Oss',
+      104: 'Biesbosch',
+      105: 'Hollandsch Diep',
+      106: "s-Hertogenbosch",
+      107: 'Oosterschelde',
+      108: 'Breda',
+      109: 'Schelde-Rijnkanaal',
+      110: 'Tilburg',
+      111: 'Noord-Brabant',
+      112: 'Roosendaal',
+      113: 'Goes',
+      114: 'Zeeland',
+      115: 'Bergen op Zoom',
+      116: 'Middelburg',
+      117: 'Helmond',
+      118: 'Vlissingen',
+      119: 'Eindhoven',
+      120: 'Westerschelde',
+      121: 'Venlo',
+      122: 'Terneuzen',
+      123: 'Zeeuws-Vlaanderen',
+      124: 'Limburg',
+      125: 'Weert',
+      126: 'Roermond',
+      127: 'Maas',
+      128: 'Sittard',
+      129: 'Heerlen',
+      130: 'Kerkrade',
+      131: 'Maastricht',
+      132: 'Vaalserberg'
+  };
+
+  let tabs = {};
+  let pages = {};
+
+  const learnMap = document.getElementById('learnMap');
+  const practiceMap = document.getElementById('practiceMap');
+  const settingsMap = document.getElementById('settingsMap');
+
+  const learnOverlay = document.getElementById('learnOverlay');
+  const practiceOverlay = document.getElementById('practiceOverlay');
+  const settingsOverlay = document.getElementById('settingsOverlay');
+
+  const learnAnswer = document.getElementById('learnAnswer');
+  const practicePrompt = document.getElementById('practicePrompt');
+  const practiceFeedback = document.getElementById('practiceFeedback');
+  const settingsInfo = document.getElementById('settingsInfo');
+
+  const questionCount = document.getElementById('questionCount');
+  const practiceAnswer = document.getElementById('practiceAnswer');
+  const startPractice = document.getElementById('startPractice');
+  const submitAnswer = document.getElementById('submitAnswer');
+  const nextQuestion = document.getElementById('nextQuestion');
+
+  const settingsNumber = document.getElementById('settingsNumber');
+  const saveSettingsPoint = document.getElementById('saveSettingsPoint');
+  const clearSettingsPoints = document.getElementById('clearSettingsPoints');
+  const settingsPointList = document.getElementById('settingsPointList');
+  const placeStatsBody = document.getElementById('placeStatsBody');
+  const sessionStatsBody = document.getElementById('sessionStatsBody');
+  const resetProgress = document.getElementById('resetProgress');
+  const refreshStats = document.getElementById('refreshStats');
+
+  const sessionTotal = document.getElementById('sessionTotal');
+  const sessionAsked = document.getElementById('sessionAsked');
+  const sessionCorrect = document.getElementById('sessionCorrect');
+  const sessionWrong = document.getElementById('sessionWrong');
+  const sessionRemaining = document.getElementById('sessionRemaining');
+
+  let settingsPoints = loadSettingsPoints();
+  let sessions = loadSessions();
+  let practiceQueue = [];
+  let activeQuestion = null;
+  let practiceStats = { asked: 0, correct: 0, wrong: 0, answers: [] };
+
+  function setActiveTab(tab) {
+    Object.keys(pages).forEach(key => {
+      pages[key].classList.toggle('hidden', key !== tab);
+      tabs[key].classList.toggle('active', key === tab);
+    });
+    if (tab === 'learn') renderLearnMap();
+    if (tab === 'practice') renderPracticeMap();
+    if (tab === 'settings') renderSettingsMap();
+    if (tab === 'stats') renderStatsTables();
+  }
+
+  function loadSettingsPoints() {
+    try {
+      const stored = localStorage.getItem('topo132-settings-points');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveSettingsPoints() {
+    localStorage.setItem('topo132-settings-points', JSON.stringify(settingsPoints));
+  }
+
+  function formatCoordinates(point) {
+    return `${point.x.toFixed(1)}%, ${point.y.toFixed(1)}%`;
+  }
+
+  function getLocationName(number) {
+    return DOCX_NAME_MAP[number] || 'Onbekend';
+  }
+
+  function createMarker(point, isHotspot = false) {
+    const element = document.createElement('button');
+    element.className = isHotspot ? 'hotspot' : 'point-marker';
+    element.style.left = point.x + '%';
+    element.style.top = point.y + '%';
+    if (isHotspot) {
+      element.title = `Nummer ${point.number}`;
+      element.type = 'button';
+    } else {
+      element.title = `Nummer ${point.number} — ${formatCoordinates(point)}`;
+    }
+    return element;
+  }
+
+  function renderSettingsMap() {
+    settingsOverlay.innerHTML = '';
+    settingsPoints.forEach(point => {
+      const marker = createMarker(point, false);
+      settingsOverlay.appendChild(marker);
+    });
+    renderSettingsList();
+  }
+
+  function renderSettingsList() {
+    settingsPointList.innerHTML = settingsPoints.map(point => `
+      <li><strong>${point.number}</strong> — ${getLocationName(point.number)} — ${formatCoordinates(point)}</li>
+    `).join('');
+  }
+
+  function renderLearnMap() {
+    learnOverlay.innerHTML = '';
+    if (!settingsPoints.length) {
+      learnAnswer.textContent = 'Geen punten ingesteld. Ga naar Instellingen om punten toe te voegen.';
+      return;
+    }
+    settingsPoints.forEach(point => {
+      const button = createMarker(point, true);
+      button.addEventListener('click', () => {
+        const name = getLocationName(point.number);
+        learnAnswer.textContent = `${point.number}. ${name}`;
+      });
+      learnOverlay.appendChild(button);
+    });
+  }
+
+  function renderPracticeMap() {
+    practiceOverlay.innerHTML = '';
+    if (activeQuestion) {
+      const marker = createMarker(activeQuestion, false);
+      practiceOverlay.appendChild(marker);
+    }
+  }
+
+  function selectPracticeQuestion() {
+    if (!practiceQueue.length) {
+      practicePrompt.textContent = 'Er zijn geen vragen meer. Start een nieuwe oefensessie.';
+      practiceAnswer.value = '';
+      return;
+    }
+    activeQuestion = practiceQueue.shift();
+    practicePrompt.textContent = `Wat is de plaats voor nummer ${activeQuestion.number}?`;
+    practiceAnswer.value = '';
+    practiceFeedback.classList.add('hidden');
+    practiceFeedback.textContent = '';
+    renderPracticeMap();
+    updatePracticeStatus();
+  }
+
+  function startPracticeSession() {
+    if (!settingsPoints.length) {
+      practicePrompt.textContent = 'Geen punten beschikbaar. Voeg eerst punten toe in Instellingen.';
+      return;
+    }
+    const count = Math.max(1, Number(questionCount.value) || 1);
+    practiceQueue = shuffleArray(settingsPoints).slice(0, count);
+    practiceStats = { asked: 0, correct: 0, wrong: 0, answers: [] };
+    updatePracticeStatus();
+    selectPracticeQuestion();
+  }
+
+  function checkPracticeAnswer() {
+    if (!activeQuestion) {
+      practiceFeedback.textContent = 'Start eerst een oefensessie.';
+      practiceFeedback.className = 'answer-box answer-bad';
+      practiceFeedback.classList.remove('hidden');
+      return;
+    }
+    const answer = practiceAnswer.value.trim();
+    if (!answer) {
+      practiceFeedback.textContent = 'Typ een antwoord in.';
+      practiceFeedback.className = 'answer-box answer-bad';
+      practiceFeedback.classList.remove('hidden');
+      return;
+    }
+    practiceStats.asked += 1;
+    const correctName = getLocationName(activeQuestion.number);
+    const isCorrect = answer === correctName;
+    practiceStats.answers.push({ number: activeQuestion.number, correct: isCorrect });
+    if (isCorrect) {
+      practiceStats.correct += 1;
+      practiceFeedback.textContent = `Goed! Het juiste antwoord is ${correctName}.`;
+      practiceFeedback.className = 'answer-box answer-good';
+    } else {
+      practiceStats.wrong += 1;
+      practiceFeedback.textContent = `Fout. Het juiste antwoord is ${correctName}.`;
+      practiceFeedback.className = 'answer-box answer-bad';
+    }
+    practiceFeedback.classList.remove('hidden');
+    updatePracticeStatus();
+  }
+
+  function nextPracticeQuestion() {
+    if (!practiceQueue.length && !activeQuestion) {
+      practicePrompt.textContent = 'Start eerst een oefensessie.';
+      return;
+    }
+    activeQuestion = null;
+    if (practiceQueue.length) {
+      selectPracticeQuestion();
+    } else {
+      practicePrompt.textContent = 'Oefensessie klaar. Start een nieuwe sessie om door te gaan.';
+      practiceOverlay.innerHTML = '';
+      updatePracticeStatus();
+      recordPracticeSession();
+    }
+  }
+
+  function updatePracticeStatus() {
+    sessionTotal.textContent = Number(questionCount.value) || 1;
+    sessionAsked.textContent = practiceStats.asked;
+    sessionCorrect.textContent = practiceStats.correct;
+    sessionWrong.textContent = practiceStats.wrong;
+    sessionRemaining.textContent = Math.max(0, (Number(questionCount.value) || 1) - practiceStats.asked);
+  }
+
+  function loadSessions() {
+    try {
+      const stored = localStorage.getItem('topo132-sessions');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveSessions() {
+    localStorage.setItem('topo132-sessions', JSON.stringify(sessions));
+  }
+
+  function renderPlaceStats() {
+    const statsByNumber = {};
+    sessions.forEach(session => {
+      (session.answers || []).forEach(answer => {
+        const key = answer.number;
+        if (!statsByNumber[key]) {
+          statsByNumber[key] = { number: key, name: getLocationName(key), correct: 0, wrong: 0 };
+        }
+        if (answer.correct) statsByNumber[key].correct += 1;
+        else statsByNumber[key].wrong += 1;
+      });
+    });
+    const rows = Object.values(statsByNumber)
+      .sort((a, b) => a.number - b.number)
+      .map((stat, index) => {
+        const asked = stat.correct + stat.wrong;
+        const score = asked ? Math.round((stat.correct / asked) * 100) : 0;
+        return `
+          <tr>
+            <td>${stat.number}</td>
+            <td>${stat.name}</td>
+            <td>${stat.correct}</td>
+            <td>${stat.wrong}</td>
+            <td>${score}%</td>
+          </tr>
+        `;
+      });
+    placeStatsBody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="5">Nog geen oefenresultaten beschikbaar.</td></tr>';
+  }
+
+  function renderSessionStats() {
+    sessionStatsBody.innerHTML = sessions.length ? sessions.map(session => {
+      return `
+        <tr>
+          <td>${new Date(session.timestamp).toLocaleString('nl-NL')}</td>
+          <td>${session.asked}</td>
+          <td>${session.correct}</td>
+          <td>${session.wrong}</td>
+          <td>${session.score}%</td>
+          <td>${session.answers.length}</td>
+          <td>${session.duration || '–'}</td>
+        </tr>
+      `;
+    }).join('') : '<tr><td colspan="7">Nog geen oefensessies voltooid.</td></tr>';
+  }
+
+  function renderStatsTables() {
+    renderPlaceStats();
+    renderSessionStats();
+  }
+
+  function recordPracticeSession() {
+    if (!practiceStats.asked) return;
+    const session = {
+      timestamp: new Date().toISOString(),
+      asked: practiceStats.asked,
+      correct: practiceStats.correct,
+      wrong: practiceStats.wrong,
+      score: Math.round((practiceStats.correct / practiceStats.asked) * 100),
+      answers: [...practiceStats.answers],
+      duration: '–'
+    };
+    sessions.unshift(session);
+    if (sessions.length > 50) sessions.length = 50;
+    saveSessions();
+    renderStatsTables();
+  }
+
+  function resetStatistics() {
+    if (!confirm('Weet je zeker dat je alle statistieken wilt verwijderen?')) return;
+    sessions = [];
+    saveSessions();
+    renderStatsTables();
+  }
+
+  function handleSettingsMapClick(event) {
+    const rect = settingsMap.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    settingsInfo.textContent = `Kliklocatie geselecteerd: ${x.toFixed(1)}%, ${y.toFixed(1)}%. Vul het nummer in en sla op.`;
+    settingsInfo.dataset.x = Math.max(0, Math.min(100, x));
+    settingsInfo.dataset.y = Math.max(0, Math.min(100, y));
+  }
+
+  function saveSettingsPoint() {
+    const x = settingsInfo.dataset.x;
+    const y = settingsInfo.dataset.y;
+    const number = Number(settingsNumber.value);
+    if (x === undefined || y === undefined) {
+      settingsInfo.textContent = 'Klik eerst op de kaart om een locatie te selecteren.';
+      return;
+    }
+    if (!Number.isInteger(number) || number <= 0) {
+      settingsInfo.textContent = 'Vul een geldig nummer in.';
+      return;
+    }
+    const existingIndex = settingsPoints.findIndex(point => point.number === number);
+    const newPoint = { number, x, y };
+    if (existingIndex >= 0) {
+      settingsPoints[existingIndex] = newPoint;
+      settingsInfo.textContent = `Punt bijgewerkt voor nummer ${number}.`;
+    } else {
+      settingsPoints.push(newPoint);
+      settingsInfo.textContent = `Punt opgeslagen voor nummer ${number}.`;
+    }
+    saveSettingsPoints();
+    renderSettingsMap();
+    settingsNumber.value = '';
+    delete settingsInfo.dataset.x;
+    delete settingsInfo.dataset.y;
+  }
+
+  function clearSettingsPoints() {
+    if (!confirm('Weet je zeker dat je alle opgeslagen punten wilt verwijderen?')) return;
+    settingsPoints = [];
+    saveSettingsPoints();
+    renderSettingsMap();
+    settingsInfo.textContent = 'Alle opgeslagen punten zijn verwijderd.';
+    settingsNumber.value = '';
+  }
+
+  function shuffleArray(array) {
+    const copy = [...array];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function initApp() {
+    tabs = {};
+    document.querySelectorAll('.tabs button[data-tab]').forEach(button => {
+      tabs[button.dataset.tab] = button;
+    });
+    pages = {
+      learn: document.getElementById('learnPage'),
+      practice: document.getElementById('practicePage'),
+      stats: document.getElementById('statsPage'),
+      settings: document.getElementById('settingsPage')
+    };
+
+    settingsMap.addEventListener('click', handleSettingsMapClick);
+    saveSettingsPoint.addEventListener('click', saveSettingsPoint);
+    clearSettingsPoints.addEventListener('click', clearSettingsPoints);
+    if (resetProgress) resetProgress.addEventListener('click', resetStatistics);
+    if (refreshStats) refreshStats.addEventListener('click', renderStatsTables);
+    learnMap.addEventListener('click', event => event.stopPropagation());
+    practiceMap.addEventListener('click', event => event.stopPropagation());
+    startPractice.addEventListener('click', startPracticeSession);
+    submitAnswer.addEventListener('click', checkPracticeAnswer);
+    nextQuestion.addEventListener('click', nextPracticeQuestion);
+    practiceAnswer.addEventListener('keydown', event => { if (event.key === 'Enter') checkPracticeAnswer(); });
+    Object.values(tabs).forEach(button => {
+      const tab = button.dataset.tab;
+      if (tab) button.addEventListener('click', () => setActiveTab(tab));
+    });
+
+    renderSettingsMap();
+    renderLearnMap();
+    renderStatsTables();
+    setActiveTab('learn');
+  }
+
+  document.addEventListener('DOMContentLoaded', initApp);
+  if (document.readyState === 'interactive' || document.readyState === 'complete') initApp();
+  </script>
+</body>
+</html>
