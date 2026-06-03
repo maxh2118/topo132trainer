@@ -81,6 +81,17 @@ volgen
         <div class="status-box">
           <h2>Antwoord</h2>
           <div id="learnAnswer" class="answer-box">Klik op een punt om het nummer en de plaatsnaam te zien.</div>
+          <div style="margin-top:10px;">
+            <div class="small-note"><strong>Filter op categorie</strong></div>
+            <div id="learnCategoryCheckboxes" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+              <label style="margin-right:8px;"><input type="checkbox" id="filter_cat_rivieren_learn"> Rivieren</label>
+              <label><input type="checkbox" id="filter_cat_gebieden_learn"> Gebieden</label>
+            </div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+              <button id="learnSelectAllCats" class="secondary" type="button">Selecteer alles</button>
+              <button id="learnDeselectAllCats" class="secondary" type="button">Deselecteer alles</button>
+            </div>
+          </div>
           <p class="small-note">Deze pagina toont de opgeslagen punten in Instellingen.</p>
         </div>
       </div>
@@ -95,20 +106,49 @@ volgen
         <div class="status-box">
           <h2>Oefensessie</h2>
           <div id="practicePrompt" class="answer-box">Klik op Start oefensessie om te beginnen.</div>
-          <div class="control-row">
-            <label for="questionCount">Aantal vragen</label>
-            <input id="questionCount" type="number" min="1" value="10">
+          <div id="practiceSetup">
+            <div class="control-row">
+              <label for="questionCount">Aantal vragen</label>
+              <input id="questionCount" type="number" min="1" value="10">
+            </div>
+            <div class="control-row" style="align-items:center; gap:10px;">
+              <label><input id="practiceFilterToggle" type="checkbox"> Alleen moeilijke plaatsen</label>
+            </div>
+            <div class="control-row">
+              <label for="difficultyRange">Moelijkheidsscore tot</label>
+              <input id="difficultyRange" type="range" min="0" max="100" value="50">
+              <div><span id="difficultyValue">50%</span></div>
+            </div>
+              <div class="control-row" style="margin-top:8px;">
+                <div class="small-note"><strong>Filter op categorie</strong></div>
+                <div id="categoryFilterCheckboxes" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                  <label style="margin-right:8px;"><input type="checkbox" id="filter_cat_rivieren_practice"> Rivieren</label>
+                  <label><input type="checkbox" id="filter_cat_gebieden_practice"> Gebieden</label>
+                </div>
+              <div style="margin-top:8px; display:flex; gap:8px;">
+                <button id="practiceSelectAllCats" class="secondary" type="button">Selecteer alles</button>
+                <button id="practiceDeselectAllCats" class="secondary" type="button">Deselecteer alles</button>
+              </div>
+              </div>
+            <div class="control-row">
+              <button id="startPractice" class="primary" type="button">Start oefensessie</button>
+              <button id="stopPractice" class="secondary hidden" type="button">Stop oefensessie</button>
+            </div>
           </div>
-          <div class="control-row">
-            <button id="startPractice" class="primary" type="button">Start oefensessie</button>
+          <div id="practiceActive" class="hidden">
+            <div class="control-row">
+              <label for="practiceAnswer">Antwoord</label>
+              <input id="practiceAnswer" type="text" placeholder="Typ de plaatsnaam hier">
+            </div>
+            <div class="control-row">
+              <button id="submitAnswer" class="secondary" type="button">Controleer</button>
+              <button id="nextQuestion" class="secondary" type="button">Volgende vraag</button>
+              <button id="endPractice" class="danger" type="button">Eindig oefensessie</button>
+            </div>
           </div>
-          <div class="control-row">
-            <label for="practiceAnswer">Antwoord</label>
-            <input id="practiceAnswer" type="text" placeholder="Typ de plaatsnaam hier">
-          </div>
-          <div class="control-row">
-            <button id="submitAnswer" class="secondary" type="button">Controleer</button>
-            <button id="nextQuestion" class="secondary" type="button">Volgende vraag</button>
+          <div id="practiceSummary" class="answer-box hidden"></div>
+          <div id="practiceSummaryFooter" class="control-row hidden">
+            <button id="restartPractice" class="primary" type="button">Nieuwe oefensessie starten</button>
           </div>
           <div id="practiceFeedback" class="answer-box hidden"></div>
           <div class="status-box" style="padding:14px;">
@@ -160,6 +200,7 @@ volgen
         </div>
         <div class="status-box">
           <h2>Instellingen</h2>
+          <div class="small-note">Klik met je muis op een getal op de kaart. Vul vervolgens hieronder het nummer in waar je op geklikt hebt. Vink de juiste provincie aan of rivieren of gebieden, zodat het punt bij het juiste onderdeel wordt opgeslagen en klik op punt opslaan.</div>
           <div id="settingsInfo" class="answer-box">Klik op de kaart om een locatie te kiezen.</div>
           <div class="control-row">
             <label for="settingsNumber">Nummer</label>
@@ -169,7 +210,19 @@ volgen
             <button id="saveSettingsPoint" class="primary" type="button">Punt opslaan</button>
             <button id="clearSettingsPoints" class="secondary" type="button">Wis alle punten</button>
           </div>
-          <div class="small-note">Opgeslagen punten worden gebruikt in de leer- en oefenpagina.</div>
+          <div class="control-row" style="margin-top:8px;">
+            <div class="small-note"><strong>Provincie</strong></div>
+            <div id="settingsProvinceRadios" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;"></div>
+          </div>
+          <div class="control-row" style="margin-top:6px;">
+            <div class="small-note"><strong>Categorieën</strong></div>
+            <div id="settingsCategoryCheckboxes" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;"></div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+              <button id="settingsSelectAllCats" class="secondary" type="button">Selecteer alles</button>
+              <button id="settingsDeselectAllCats" class="secondary" type="button">Deselecteer alles</button>
+            </div>
+          </div>
+          <div class="small-note">Opgeslagen punten worden gebruikt in de leer- en oefenpagina. Je kunt ieder punt afzonderlijk verwijderen als je een foutje hebt gemaakt.</div>
           <div class="panel" style="margin-top:16px;">
             <h3>Opgeslagen punten</h3>
             <div id="settingsPointList" class="small-note"></div>
@@ -197,6 +250,9 @@ volgen
       131: 'Maastricht', 132: 'Vaalserberg'
     };
 
+    const PROVINCES = ['Drenthe','Flevoland','Friesland','Gelderland','Groningen','Limburg','Noord-Brabant','Noord-Holland','Overijssel','Utrecht','Zeeland','Zuid-Holland'];
+    const CATEGORIES = ['rivieren','gebieden', ...PROVINCES];
+
     function $(id) { return document.getElementById(id); }
     function loadJSON(key) { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : []; } catch { return []; } }
     function saveJSON(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
@@ -207,7 +263,9 @@ volgen
       practiceQueue: [],
       activeQuestion: null,
       practiceStats: { asked: 0, correct: 0, wrong: 0, answers: [] },
-      selectedPoint: null
+      selectedPoint: null,
+      provinceFilter: Object.fromEntries(PROVINCES.map(p => [p, true]))
+      ,categoryFilter: Object.fromEntries(CATEGORIES.map(c => [c, true]))
     };
 
     function setActiveTab(tab) {
@@ -245,7 +303,12 @@ volgen
         $('learnAnswer').textContent = 'Geen opgeslagen punten. Ga naar Instellingen om punten toe te voegen.';
         return;
       }
+      const selectedCats = Object.keys(state.categoryFilter).filter(k => state.categoryFilter[k]);
       state.settingsPoints.forEach(point => {
+        if (point.province && !state.provinceFilter[point.province]) return;
+        if (point.categories && point.categories.length) {
+          if (!point.categories.some(c => selectedCats.includes(c))) return;
+        }
         const marker = createMarker(point, false);
         marker.addEventListener('click', () => {
           $('learnAnswer').textContent = `${point.number}. ${getLocationName(point.number)}`;
@@ -287,9 +350,49 @@ volgen
     function renderSettingsPage() {
       const overlay = $('settingsOverlay');
       overlay.innerHTML = '';
-      $('settingsPointList').innerHTML = state.settingsPoints.length ? state.settingsPoints.map(point => ` <div><strong>${point.number}</strong> — ${getLocationName(point.number)} — ${point.x.toFixed(1)}%, ${point.y.toFixed(1)}%</div>`).join('') : '<div>Geen opgeslagen punten.</div>';
+      $('settingsPointList').innerHTML = state.settingsPoints.length ? state.settingsPoints.map(point => {
+        const prov = point.province ? ` — ${point.province}` : '';
+        const cats = point.categories && point.categories.length ? ` — ${point.categories.join(', ')}` : '';
+        return ` <div><strong>${point.number}</strong> — ${getLocationName(point.number)} — ${point.x.toFixed(1)}%, ${point.y.toFixed(1)}%${prov}${cats}</div>`;
+      }).join('') : '<div>Geen opgeslagen punten.</div>';
       state.settingsPoints.forEach(point => {
         const marker = createMarker(point, true);
+        marker.addEventListener('click', () => {
+          state.selectedPoint = { x: point.x, y: point.y };
+          $('settingsInfo').textContent = `Geselecteerd: ${point.x.toFixed(1)}%, ${point.y.toFixed(1)}%`;
+          $('settingsNumber').value = point.number;
+          // set province radio
+          if (point.province) {
+            const rb = document.querySelector(`input[name="settingsProvinceRadio"][value="${point.province}"]`);
+            if (rb) rb.checked = true;
+            const sid = 'settings_cat_' + point.province.replace(/\s+/g,'_');
+            const sEl = document.getElementById(sid);
+            if (sEl) {
+              sEl.checked = true;
+              state.categoryFilter[point.province] = true;
+              const pid = `filter_cat_${point.province}_practice`;
+              const lid = `filter_cat_${point.province}_learn`;
+              const pEl = document.getElementById(pid); if (pEl) pEl.checked = true;
+              const lEl = document.getElementById(lid); if (lEl) lEl.checked = true;
+              // uncheck special categories
+              ['rivieren','gebieden'].forEach(special => {
+                state.categoryFilter[special] = false;
+                const spid = `filter_cat_${special}_practice`;
+                const slid = `filter_cat_${special}_learn`;
+                const spsid = `settings_cat_${special.replace(/\s+/g,'_')}`;
+                const spEl = document.getElementById(spid); if (spEl) spEl.checked = false;
+                const slEl = document.getElementById(slid); if (slEl) slEl.checked = false;
+                const spsEl = document.getElementById(spsid); if (spsEl) spsEl.checked = false;
+              });
+            }
+          } else {
+            const rb = document.querySelector('input[name="settingsProvinceRadio"]:checked'); if (rb) rb.checked = false;
+          }
+          // set categories (settings checkboxes)
+          document.querySelectorAll('#settingsCategoryCheckboxes input[type="checkbox"]').forEach(cb => {
+            cb.checked = point.categories && point.categories.includes(cb.value);
+          });
+        });
         overlay.appendChild(marker);
       });
       $('settingsInfo').textContent = state.selectedPoint ? `Geselecteerd: ${state.selectedPoint.x.toFixed(1)}%, ${state.selectedPoint.y.toFixed(1)}%` : 'Klik op de kaart om een locatie te kiezen.';
@@ -303,30 +406,120 @@ volgen
       $('sessionRemaining').textContent = Math.max(0, (Number($('questionCount').value) || 1) - state.practiceStats.asked);
     }
 
+    function setAllCategories(checked) {
+      CATEGORIES.forEach(cat => {
+        state.categoryFilter[cat] = !!checked;
+        const pid = `filter_cat_${cat}_practice`;
+        const lid = `filter_cat_${cat}_learn`;
+        const sid = `settings_cat_${cat.replace(/\s+/g,'_')}`;
+        const pEl = document.getElementById(pid); if (pEl) pEl.checked = !!checked;
+        const lEl = document.getElementById(lid); if (lEl) lEl.checked = !!checked;
+        const sEl = document.getElementById(sid); if (sEl) sEl.checked = !!checked;
+      });
+      renderLearnPage(); renderPracticePage();
+    }
+
+    function calculatePlaceScores() {
+      const counts = {};
+      state.sessions.forEach(session => {
+        (session.answers || []).forEach(answer => {
+          if (!counts[answer.number]) counts[answer.number] = { good: 0, wrong: 0 };
+          if (answer.correct) counts[answer.number].good += 1;
+          else counts[answer.number].wrong += 1;
+        });
+      });
+      const scores = {};
+      Object.keys(counts).forEach(key => {
+        const total = counts[key].good + counts[key].wrong;
+        scores[key] = total ? Math.round((counts[key].good / total) * 100) : null;
+      });
+      return scores;
+    }
+
+    function getPracticeCandidates() {
+      let candidates = [...state.settingsPoints];
+      candidates = candidates.filter(point => {
+        if (!point.province) return true;
+        return !!state.provinceFilter[point.province];
+      });
+      const selectedCats = Object.keys(state.categoryFilter).filter(k => state.categoryFilter[k]);
+      candidates = candidates.filter(point => {
+        if (point.categories && point.categories.length) {
+          return point.categories.some(c => selectedCats.includes(c));
+        }
+        return true;
+      });
+      if ($('practiceFilterToggle').checked) {
+        const threshold = Number($('difficultyRange').value);
+        const scores = calculatePlaceScores();
+        return candidates.filter(point => {
+          const score = scores[point.number];
+          return typeof score === 'number' && score <= threshold;
+        });
+      }
+      return candidates;
+    }
+
+    function setPracticeMode(active) {
+      $('practiceSetup').classList.toggle('hidden', active);
+      $('practiceActive').classList.toggle('hidden', !active);
+      $('stopPractice').classList.toggle('hidden', !active);
+      $('practiceSummary').classList.add('hidden');
+      $('practiceSummaryFooter').classList.add('hidden');
+      if (!active) {
+        $('practiceAnswer').value = '';
+      }
+    }
+
+    function showPracticeSummary(message) {
+      const score = state.practiceStats.asked ? Math.round((state.practiceStats.correct / state.practiceStats.asked) * 100) : 0;
+      $('practiceSummary').textContent = `${message} Eindstand: ${state.practiceStats.correct} goed, ${state.practiceStats.wrong} fout. Score: ${score}%`;
+      $('practiceSummary').classList.remove('hidden');
+      $('practiceSummaryFooter').classList.remove('hidden');
+    }
+
+    function endPracticeSession(stopped = false) {
+      state.activeQuestion = null;
+      state.practiceQueue = [];
+      renderPracticePage();
+      setPracticeMode(false);
+      if (state.practiceStats.asked) {
+        recordSession();
+      }
+      const message = stopped ? 'Oefensessie gestopt.' : 'Oefensessie afgerond.';
+      $('practicePrompt').textContent = message;
+      showPracticeSummary(message);
+      updatePracticeStatus();
+    }
+
     function startPractice() {
       if (!state.settingsPoints.length) {
         $('practicePrompt').textContent = 'Geen punten beschikbaar. Voeg punten toe in Instellingen.';
         return;
       }
       const count = Math.max(1, Number($('questionCount').value) || 1);
-      const shuffled = [...state.settingsPoints].sort(() => Math.random() - 0.5);
+      const candidates = getPracticeCandidates();
+      if (!candidates.length) {
+        $('practicePrompt').textContent = 'Geen punten voldoen aan de moeilijkheidsfilter. Pas de slider of het filter aan.';
+        return;
+      }
+      const shuffled = candidates.sort(() => Math.random() - 0.5);
       state.practiceQueue = shuffled.slice(0, count);
       state.practiceStats = { asked: 0, correct: 0, wrong: 0, answers: [] };
       $('practiceFeedback').classList.add('hidden');
+      $('practiceSummary').classList.add('hidden');
+      $('practiceSummaryFooter').classList.add('hidden');
+      setPracticeMode(true);
       nextQuestion();
     }
 
     function nextQuestion() {
       if (!state.practiceQueue.length) {
-        state.activeQuestion = null;
-        $('practicePrompt').textContent = 'Oefensessie klaar. Start opnieuw om verder te oefenen.';
-        $('practiceOverlay').innerHTML = '';
-        recordSession();
-        updatePracticeStatus();
+        endPracticeSession(false);
         return;
       }
       state.activeQuestion = state.practiceQueue.shift();
-      $('practicePrompt').textContent = `Wat is de plaats voor nummer ${state.activeQuestion.number}?`;
+      $('practicePrompt').textContent = 'Welke plaats is op de kaart omcirkeld?';
       $('practiceAnswer').value = '';
       $('practiceFeedback').classList.add('hidden');
       renderPracticePage();
@@ -398,7 +591,15 @@ volgen
         return;
       }
       const index = state.settingsPoints.findIndex(item => item.number === number);
-      const point = { number, x: state.selectedPoint.x, y: state.selectedPoint.y };
+      const provinceRadio = document.querySelector('input[name="settingsProvinceRadio"]:checked');
+      const province = provinceRadio ? provinceRadio.value : '';
+      // collect selected categories from settingsCategoryCheckboxes
+      const categories = [];
+      const settingsCats = document.querySelectorAll('#settingsCategoryCheckboxes input[type="checkbox"]');
+      settingsCats.forEach(cb => { if (cb.checked) categories.push(cb.value); });
+      // also include selected province as category for compatibility with filters
+      if (province && !categories.includes(province)) categories.push(province);
+      const point = { number, x: state.selectedPoint.x, y: state.selectedPoint.y, province: province || undefined, categories };
       if (index >= 0) state.settingsPoints[index] = point;
       else state.settingsPoints.push(point);
       saveJSON('topo132-settings-points', state.settingsPoints);
@@ -427,13 +628,182 @@ volgen
         state.selectedPoint = { x, y };
         $('settingsInfo').textContent = `Geselecteerd: ${x.toFixed(1)}%, ${y.toFixed(1)}%`;
       });
+      // populate province select in settings
+      if ($('settingsProvinceRadios')) {
+        PROVINCES.forEach(p => {
+          const id = 'prov_setting_' + p.replace(/\s+/g,'_');
+          const label = document.createElement('label'); label.style.marginRight = '8px';
+          const rb = document.createElement('input'); rb.type = 'radio'; rb.name = 'settingsProvinceRadio'; rb.id = id; rb.value = p;
+          rb.addEventListener('change', e => {
+            if (e.target.checked) {
+              const sid = 'settings_cat_' + p.replace(/\s+/g,'_');
+              const sEl = document.getElementById(sid);
+              if (sEl) {
+                sEl.checked = true;
+                state.categoryFilter[p] = true;
+                const pid = `filter_cat_${p}_practice`;
+                const lid = `filter_cat_${p}_learn`;
+                const pEl = document.getElementById(pid); if (pEl) pEl.checked = true;
+                const lEl = document.getElementById(lid); if (lEl) lEl.checked = true;
+                // uncheck special categories when a province is selected
+                ['rivieren','gebieden'].forEach(special => {
+                  state.categoryFilter[special] = false;
+                  const spid = `filter_cat_${special}_practice`;
+                  const slid = `filter_cat_${special}_learn`;
+                  const spsid = `settings_cat_${special.replace(/\s+/g,'_')}`;
+                  const spEl = document.getElementById(spid); if (spEl) spEl.checked = false;
+                  const slEl = document.getElementById(slid); if (slEl) slEl.checked = false;
+                  const spsEl = document.getElementById(spsid); if (spsEl) spsEl.checked = false;
+                });
+              }
+            }
+          });
+          label.appendChild(rb);
+          label.appendChild(document.createTextNode(' ' + p));
+          $('settingsProvinceRadios').appendChild(label);
+        });
+      }
+      // populate province checkboxes for practice filter
+      if ($('provinceCheckboxes')) {
+          PROVINCES.forEach(p => {
+          const id = `prov_${p.replace(/\s+/g,'_')}`;
+          const label = document.createElement('label');
+          label.style.marginRight = '8px';
+          const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = id; cb.checked = !!state.provinceFilter[p];
+          cb.addEventListener('change', () => { state.provinceFilter[p] = cb.checked; renderLearnPage(); renderPracticePage(); });
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(' ' + p));
+          $('provinceCheckboxes').appendChild(label);
+        });
+      }
+      // setup category filter checkboxes (practice + learn) and settings checkboxes
+      // clear existing containers
+      if ($('settingsCategoryCheckboxes')) $('settingsCategoryCheckboxes').innerHTML = '';
+      if ($('categoryFilterCheckboxes')) $('categoryFilterCheckboxes').innerHTML = '';
+      if ($('learnCategoryCheckboxes')) $('learnCategoryCheckboxes').innerHTML = '';
+      // settings should NOT include provinces as category-checkboxes (use province radio instead)
+      const settingsCats = CATEGORIES.filter(cat => !PROVINCES.includes(cat));
+      const allCats = CATEGORIES;
+      // create settings category checkboxes (excluding provinces)
+      settingsCats.forEach(cat => {
+        const sid = `settings_cat_${cat.replace(/\s+/g,'_')}`;
+        if ($('settingsCategoryCheckboxes')) {
+          const lbl = document.createElement('label'); lbl.style.marginRight = '8px';
+          const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = sid; cb.value = cat;
+          lbl.appendChild(cb); lbl.appendChild(document.createTextNode(' ' + cat));
+          $('settingsCategoryCheckboxes').appendChild(lbl);
+        }
+      });
+      // create practice and learn checkboxes for all categories (including provinces)
+      allCats.forEach(cat => {
+        const pid = `filter_cat_${cat}_practice`;
+        const lid = `filter_cat_${cat}_learn`;
+        // create practice checkbox
+        if ($('categoryFilterCheckboxes')) {
+          const plbl = document.createElement('label'); plbl.style.marginRight = '8px';
+          const pcb = document.createElement('input'); pcb.type = 'checkbox'; pcb.id = pid; pcb.value = cat; pcb.checked = !!state.categoryFilter[cat];
+          plbl.appendChild(pcb); plbl.appendChild(document.createTextNode(' ' + cat));
+          $('categoryFilterCheckboxes').appendChild(plbl);
+        }
+        // create learn checkbox
+        if ($('learnCategoryCheckboxes')) {
+          const llbl = document.createElement('label'); llbl.style.marginRight = '8px';
+          const lcb = document.createElement('input'); lcb.type = 'checkbox'; lcb.id = lid; lcb.value = cat; lcb.checked = !!state.categoryFilter[cat];
+          llbl.appendChild(lcb); llbl.appendChild(document.createTextNode(' ' + cat));
+          $('learnCategoryCheckboxes').appendChild(llbl);
+        }
+        // initial state and handlers
+        if ($(pid)) $(pid).checked = !!state.categoryFilter[cat];
+        if ($(lid)) $(lid).checked = !!state.categoryFilter[cat];
+        const handler = checked => {
+          state.categoryFilter[cat] = !!checked;
+          if ($(pid)) $(pid).checked = !!checked;
+          if ($(lid)) $(lid).checked = !!checked;
+          // sync settings checkbox only if it exists (non-province categories)
+          const sid = `settings_cat_${cat.replace(/\s+/g,'_')}`;
+          const s = document.getElementById(sid);
+          if (s) {
+            if (checked) {
+              // ensure only one settings checkbox is selected: uncheck others
+              document.querySelectorAll('#settingsCategoryCheckboxes input[type="checkbox"]').forEach(cb => { if (cb !== s) cb.checked = false; });
+              // clear selected province radio if any
+              const rb = document.querySelector('input[name="settingsProvinceRadio"]:checked'); if (rb) rb.checked = false;
+              s.checked = true;
+            } else {
+              s.checked = false;
+            }
+          }
+          // if user checks 'rivieren' or 'gebieden', unset all province categories and province radio
+          if (checked && (cat === 'rivieren' || cat === 'gebieden')) {
+            PROVINCES.forEach(pr => {
+              state.categoryFilter[pr] = false;
+              const ppid = `filter_cat_${pr}_practice`;
+              const plid = `filter_cat_${pr}_learn`;
+              const psid = `settings_cat_${pr.replace(/\s+/g,'_')}`;
+              const pEl2 = document.getElementById(ppid); if (pEl2) pEl2.checked = false;
+              const lEl2 = document.getElementById(plid); if (lEl2) lEl2.checked = false;
+              const sEl2 = document.getElementById(psid); if (sEl2) sEl2.checked = false;
+            });
+            // clear selected province radio if any
+            const selectedRb = document.querySelector('input[name="settingsProvinceRadio"]:checked');
+            if (selectedRb) selectedRb.checked = false;
+          }
+          // if user checks a province category, unset rivieren and gebieden
+          if (checked && PROVINCES.includes(cat)) {
+            ['rivieren','gebieden'].forEach(special => {
+              state.categoryFilter[special] = false;
+              const spid = `filter_cat_${special}_practice`;
+              const slid = `filter_cat_${special}_learn`;
+              const spsid = `settings_cat_${special.replace(/\s+/g,'_')}`;
+              const spEl = document.getElementById(spid); if (spEl) spEl.checked = false;
+              const slEl = document.getElementById(slid); if (slEl) slEl.checked = false;
+              const spsEl = document.getElementById(spsid); if (spsEl) spsEl.checked = false;
+            });
+            // also ensure only this province is selected among settings (clear other settings checkboxes)
+            document.querySelectorAll('#settingsCategoryCheckboxes input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+          }
+          renderLearnPage(); renderPracticePage();
+        };
+        const pEl = document.getElementById(pid);
+        if (pEl) pEl.addEventListener('change', e => handler(e.target.checked));
+        const lEl = document.getElementById(lid);
+        if (lEl) lEl.addEventListener('change', e => handler(e.target.checked));
+        const sEl = document.getElementById(`settings_cat_${cat.replace(/\s+/g,'_')}`);
+        if (sEl) sEl.addEventListener('change', e => handler(e.target.checked));
+      });
+      if ($('selectAllProvinces')) $('selectAllProvinces').addEventListener('click', () => { PROVINCES.forEach(p => { state.provinceFilter[p] = true; const el = document.getElementById('prov_'+p.replace(/\s+/g,'_')); if (el) el.checked = true; }); renderLearnPage(); renderPracticePage(); });
+      if ($('deselectAllProvinces')) $('deselectAllProvinces').addEventListener('click', () => { PROVINCES.forEach(p => { state.provinceFilter[p] = false; const el = document.getElementById('prov_'+p.replace(/\s+/g,'_')); if (el) el.checked = false; }); renderLearnPage(); renderPracticePage(); });
+      if ($('learnSelectAllCats')) $('learnSelectAllCats').addEventListener('click', () => setAllCategories(true));
+      if ($('learnDeselectAllCats')) $('learnDeselectAllCats').addEventListener('click', () => setAllCategories(false));
+      if ($('practiceSelectAllCats')) $('practiceSelectAllCats').addEventListener('click', () => setAllCategories(true));
+      if ($('practiceDeselectAllCats')) $('practiceDeselectAllCats').addEventListener('click', () => setAllCategories(false));
+      if ($('settingsSelectAllCats')) $('settingsSelectAllCats').addEventListener('click', () => setAllCategories(true));
+      if ($('settingsDeselectAllCats')) $('settingsDeselectAllCats').addEventListener('click', () => setAllCategories(false));
       $('saveSettingsPoint').addEventListener('click', savePoint);
       $('clearSettingsPoints').addEventListener('click', clearPoints);
       $('startPractice').addEventListener('click', startPractice);
+      $('stopPractice').addEventListener('click', () => endPracticeSession(true));
       $('submitAnswer').addEventListener('click', checkAnswer);
       $('nextQuestion').addEventListener('click', nextQuestion);
+      $('endPractice').addEventListener('click', () => endPracticeSession(true));
       $('practiceAnswer').addEventListener('keydown', event => {
-        if (event.key === 'Enter') checkAnswer();
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (!$('practiceFeedback').classList.contains('hidden')) {
+            nextQuestion();
+          } else {
+            checkAnswer();
+          }
+        }
+      });
+      $('restartPractice').addEventListener('click', () => {
+        $('practiceSummary').classList.add('hidden');
+        $('practiceSummaryFooter').classList.add('hidden');
+        $('practicePrompt').textContent = 'Klik op Start oefensessie om te beginnen.';
+        setPracticeMode(false);
+      });
+      $('difficultyRange').addEventListener('input', () => {
+        $('difficultyValue').textContent = `${$('difficultyRange').value}%`;
       });
       $('refreshStats').addEventListener('click', renderStatsPage);
       $('resetProgress').addEventListener('click', resetStats);
